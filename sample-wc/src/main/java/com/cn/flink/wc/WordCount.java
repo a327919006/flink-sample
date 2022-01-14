@@ -19,10 +19,14 @@ public class WordCount {
         String filePath = "D:\\share\\flink-sample\\sample-wc\\src\\main\\resources\\hello.txt";
         DataSet<String> dataSource = env.readTextFile(filePath);
 
-        dataSource.flatMap( // 逐行处理数据
+        // 对数据集进行处理，按空格分词展开，转换成(word, 1)二元组进行统计
+        // 按照第一个位置的word分组
+        // 按照第二个位置上的数据求和
+        dataSource.flatMap(
                 new FlatMapFunction<String, Tuple2<String, Integer>>() {
                     @Override
                     public void flatMap(String value, Collector<Tuple2<String, Integer>> out) throws Exception {
+                        // value为一行数据
                         String[] words = value.split(" ");
 
                         for (String word : words) {
