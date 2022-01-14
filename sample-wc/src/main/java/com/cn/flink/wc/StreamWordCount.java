@@ -2,6 +2,7 @@ package com.cn.flink.wc;
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.client.program.StreamContextEnvironment;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -23,8 +24,13 @@ public class StreamWordCount {
 //        String filePath = "D:\\share\\flink-sample\\sample-wc\\src\\main\\resources\\hello.txt";
 //        DataStream<String> dataSource = env.readTextFile(filePath);
 
-        // 从socket文本流读取数据
-        DataStream<String> dataSource = env.socketTextStream("192.168.1.222", 7777);
+        // 从args中获取参数
+        ParameterTool parameterTool = ParameterTool.fromArgs(args);
+        String host = parameterTool.get("host", "192.168.1.222");
+        int port = parameterTool.getInt("port", 7777);
+
+        // 从socket文本流读取数据，linux服务器运行nc -lk 7777
+        DataStream<String> dataSource = env.socketTextStream(host, port);
 
         // 基于数据流进行转换计算
         dataSource.flatMap(new FlatMapFunction<String, Tuple2<String, Integer>>() {
