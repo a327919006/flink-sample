@@ -3,11 +3,7 @@ package com.cn.flink.wc;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
-import org.apache.flink.api.java.operators.AggregateOperator;
-import org.apache.flink.api.java.operators.DataSource;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
 
 /**
@@ -35,7 +31,7 @@ public class WordCount {
                     }
                 })
                 .groupBy(0) // 按第一个位置的word分组
-                .sum(1) // 按第二个位置的数据求和
+                .sum(1)// 按第二个位置的数据求和
                 .print();
     }
 }
