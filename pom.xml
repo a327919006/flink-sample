@@ -10,6 +10,7 @@
     <version>1.0.0</version>
     <modules>
         <module>sample-wc</module>
+        <module>sample-starrocks</module>
     </modules>
 
 
@@ -45,6 +46,33 @@
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-clients_${scala.library.version}</artifactId>
                 <version>${flink.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-table-planner_${scala.library.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <!--starRocks-->
+            <dependency>
+                <groupId>com.starrocks</groupId>
+                <artifactId>flink-connector-starrocks</artifactId>
+                <version>1.1.15_flink-1.14_${scala.library.version}</version>
+            </dependency>
+
+            <!--kafka-->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-connector-kafka_${scala.library.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <!--common-->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.22</version>
+                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
