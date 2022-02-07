@@ -1,0 +1,12 @@
+1,sensor1,10
+2,sensor2,20
+3,sensor3,30
+4,sensor4,40
+1,sensor1,111
+2,sensor2,221
+3,sensor3,331
+4,sensor4,441
+1,sensor1,11
+2,sensor2,21
+3,sensor3,31
+4,sensor4,41
