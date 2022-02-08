@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>sample-wc</artifactId>
+    <artifactId>sample-base</artifactId>
 
     <dependencies>
         <!--flink-->
@@ -24,6 +24,20 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients_${scala.library.version}</artifactId>
+        </dependency>
+
+        <!--kafka-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-kafka_${scala.library.version}</artifactId>
+        </dependency>
+
+        <!--common-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.22</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

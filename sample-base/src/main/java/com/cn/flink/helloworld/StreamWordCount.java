@@ -1,4 +1,4 @@
-package com.cn.flink.wc;
+package com.cn.flink.helloworld;
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -17,21 +17,17 @@ public class StreamWordCount {
         StreamExecutionEnvironment env = StreamContextEnvironment.getExecutionEnvironment();
 
         // 设置并行度，默认值 = 当前计算机的CPU逻辑核数（设置成1即单线程处理）
-        env.setParallelism(4);
-
-        // 从文件中读取数据
-//        String filePath = "D:\\share\\flink-sample\\sample-wc\\src\\main\\resources\\hello.txt";
-//        DataStream<String> dataSource = env.readTextFile(filePath);
+        env.setParallelism(1);
 
         // 从args中获取参数
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
-        String host = parameterTool.get("host", "192.168.1.222");
+        String host = parameterTool.get("host", "192.168.157.138");
         int port = parameterTool.getInt("port", 7777);
 
         // 从socket文本流读取数据，linux服务器运行nc -lk 7777
         DataStream<String> dataSource = env.socketTextStream(host, port);
 
-        // 基于数据流进行转换计算
+        // 基于数据流进行转换计算，每一步都支持设置并行度
         dataSource.flatMap(new FlatMapFunction<String, Tuple2<String, Integer>>() {
             @Override
             public void flatMap(String value, Collector<Tuple2<String, Integer>> out) throws Exception {
@@ -43,10 +39,10 @@ public class StreamWordCount {
             }
         })
                 .keyBy(item -> item.f0)
-                .sum(1)
-                .print();
+                .sum(1).setParallelism(1)
+                .print().setParallelism(1);
 
         // 执行任务
-        env.execute();
+        env.execute("StreamWordCount");
     }
 }
