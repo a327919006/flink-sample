@@ -1,9 +1,8 @@
 package com.cn.flink.transform;
 
 import com.cn.flink.domain.SensorData;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -11,16 +10,11 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import java.io.File;
 
 /**
- * keyBy分组，支持：
- * sum求和
- * min最小值
- * max最大值
- * minBy最小值-first为true时与min结果相同，为false时，新数据与最小值相同时，取新数据
- * maxBy最大值-同理
+ * reduce，更复杂的应用场景，相比min等只支持单个属性计算，reduce支持自定义逻辑
  *
  * @author Chen Nan
  */
-public class Test4_KeyBy {
+public class Test5_Reduse {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
@@ -38,9 +32,11 @@ public class Test4_KeyBy {
                 }, TypeInformation.of(SensorData.class))
                 // 根据ID分组
                 .keyBy((KeySelector<SensorData, Long>) SensorData::getId)
-                // 取每个ID中value的最大值
-//                .max("value")
-                .maxBy("value", false)
+                // 取每个ID中value的最大值和最新时间
+                .reduce((ReduceFunction<SensorData>) (oldData, newData) ->
+                        new SensorData(newData.getId(), newData.getName(),
+                                Math.max(newData.getValue(), oldData.getValue()),
+                                newData.getTimestamp()))
                 .print();
 
         env.execute();

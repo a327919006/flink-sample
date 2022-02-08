@@ -14,4 +14,5 @@ public class SensorData {
     private Long id;
     private String name;
     private Double value;
+    private Long timestamp;
 }

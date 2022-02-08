@@ -21,9 +21,9 @@ public class SourceTest1_Collection {
         env.setParallelism(1);
 
         List<SensorData> dataList = Arrays.asList(
-                new SensorData(1L, "sensor1", 10D),
-                new SensorData(2L, "sensor2", 20D),
-                new SensorData(3L, "sensor3", 30D)
+                new SensorData(1L, "sensor1", 10D, System.currentTimeMillis()),
+                new SensorData(2L, "sensor2", 20D, System.currentTimeMillis()),
+                new SensorData(3L, "sensor3", 30D, System.currentTimeMillis())
         );
         env.fromCollection(dataList).print("element");
 

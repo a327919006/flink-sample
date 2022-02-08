@@ -25,6 +25,7 @@ public class Test1_Map {
                     sensorData.setId(Long.parseLong(split[0]));
                     sensorData.setName(split[1]);
                     sensorData.setValue(Double.parseDouble(split[2]));
+                    sensorData.setTimestamp(Long.parseLong(split[3]));
                     return sensorData;
                 }, TypeInformation.of(SensorData.class))
                 .print();
