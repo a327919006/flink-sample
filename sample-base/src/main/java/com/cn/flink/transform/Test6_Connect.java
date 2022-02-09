@@ -12,7 +12,7 @@ import org.apache.flink.streaming.api.functions.co.CoMapFunction;
 import java.io.File;
 
 /**
- * 合流，只能合并两个流，返回结果允许不同
+ * connect合流，只能合并两个流，返回结果类型允许不同
  *
  * @author Chen Nan
  */
