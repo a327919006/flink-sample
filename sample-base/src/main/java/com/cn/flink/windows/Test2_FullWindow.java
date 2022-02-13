@@ -1,32 +1,24 @@
 package com.cn.flink.windows;
 
 import com.cn.flink.domain.SensorData;
-import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.assigners.ProcessingTimeSessionWindows;
-import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
+import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.util.Collector;
 
-import java.io.File;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Window:
- * TumblingWindow
- * SlidingWindow
- * SessionWindow
- * GlobalWindow-count使用
- * <p>
- * WindowFunction:
- * 增量：ReduceFunction、AggregateFunction（当前示例）
- * 全量：WindowFunction、ProcessWindowFunction
+ * 使用全量窗口函数
  *
  * @author Chen Nan
  */
-public class Test1_Window {
+public class Test2_FullWindow {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
@@ -45,34 +37,16 @@ public class Test1_Window {
                 .keyBy((KeySelector<SensorData, Long>) SensorData::getId)
                 // 滚动时间窗口
                 .window(TumblingProcessingTimeWindows.of(Time.seconds(5)))
-                // 滑动时间窗口
-                // .window(SlidingProcessingTimeWindows.of(Time.seconds(10), Time.seconds(5)))
-                // 会话窗口
-                // .window(ProcessingTimeSessionWindows.withGap(Time.seconds(5)))
-                // 滚动计数窗口
-                // .countWindow(10)
-                // 滑动计数窗口
-                // .countWindow(10, 2)
-                // 计算窗口内每个ID出现的次数
-                .aggregate(new AggregateFunction<SensorData, Integer, Integer>() {
+                .apply(new WindowFunction<SensorData, Integer, Long, TimeWindow>() {
                     @Override
-                    public Integer createAccumulator() {
-                        return 0;
-                    }
-
-                    @Override
-                    public Integer add(SensorData value, Integer accumulator) {
-                        return accumulator + 1;
-                    }
-
-                    @Override
-                    public Integer getResult(Integer accumulator) {
-                        return accumulator;
-                    }
-
-                    @Override
-                    public Integer merge(Integer a, Integer b) {
-                        return a + b;
+                    public void apply(Long key, TimeWindow window, Iterable<SensorData> input, Collector<Integer> out) throws Exception {
+                        long start = window.getStart();
+                        long end = window.getEnd();
+                        AtomicInteger count = new AtomicInteger();
+                        input.forEach(data -> count.getAndIncrement());
+                        int result = count.get();
+                        System.out.println("star=" + start + " end=" + end + " key=" + key + " result=" + result);
+                        out.collect(result);
                     }
                 })
                 .print();
