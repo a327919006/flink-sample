@@ -38,6 +38,13 @@ public class Test2_FullWindow {
                 .keyBy((KeySelector<SensorData, Long>) SensorData::getId)
                 // 滚动时间窗口
                 .window(TumblingProcessingTimeWindows.of(Time.seconds(5)))
+                // WindowFunction和ProcessWindowFunction两种写法都可以
+                // .process(new ProcessWindowFunction<SensorData, Tuple4<Long, Long, Long, Integer>, Long, TimeWindow>() {
+                //     @Override
+                //     public void process(Long key, Context context, Iterable<SensorData> elements, Collector<Tuple4<Long, Long, Long, Integer>> out) throws Exception {
+                //
+                //     }
+                // })
                 .apply(new WindowFunction<SensorData, Tuple4<Long, Long, Long, Integer>, Long, TimeWindow>() {
                     @Override
                     public void apply(Long key, TimeWindow window, Iterable<SensorData> input,
