@@ -13,7 +13,7 @@ import org.apache.flink.streaming.connectors.redis.common.mapper.RedisMapper;
 import java.io.File;
 
 /**
- * sink-将数据写入redis
+ * sink-将数据写入Redis
  *
  * @author Chen Nan
  */

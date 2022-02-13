@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * sink-将数据写入redis
+ * sink-将数据写入ElasticSearch7
  *
  * @author Chen Nan
  */

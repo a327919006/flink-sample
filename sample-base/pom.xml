@@ -48,6 +48,13 @@
             <version>${flink.version}</version>
         </dependency>
 
+        <!--mysql-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.46</version>
+        </dependency>
+
         <!--common-->
         <dependency>
             <groupId>org.projectlombok</groupId>

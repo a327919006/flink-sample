@@ -9,7 +9,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import java.io.File;
 
 /**
- * sink-将数据写入kafka
+ * sink-将数据写入Kafka
  *
  * @author Chen Nan
  */
