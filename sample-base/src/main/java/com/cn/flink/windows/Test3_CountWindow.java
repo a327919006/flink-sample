@@ -1,9 +1,11 @@
 package com.cn.flink.windows;
 
 import com.cn.flink.domain.SensorData;
+import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
@@ -15,11 +17,11 @@ import org.apache.flink.util.Collector;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 使用全量窗口函数
+ * 滑动计数窗口
  *
  * @author Chen Nan
  */
-public class Test2_FullWindow {
+public class Test3_CountWindow {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
@@ -36,26 +38,28 @@ public class Test2_FullWindow {
                 }, TypeInformation.of(SensorData.class))
                 // 使用window需先keyBy，如根据ID分组
                 .keyBy((KeySelector<SensorData, Long>) SensorData::getId)
-                // 滚动时间窗口
-                .window(TumblingProcessingTimeWindows.of(Time.seconds(5)))
-                // WindowFunction和ProcessWindowFunction两种写法都可以
-                // .process(new ProcessWindowFunction<SensorData, Tuple4<Long, Long, Long, Integer>, Long, TimeWindow>() {
-                //     @Override
-                //     public void process(Long key, Context context, Iterable<SensorData> elements, Collector<Tuple4<Long, Long, Long, Integer>> out) throws Exception {
-                //
-                //     }
-                // })
-                // 计算时间窗口内每个ID出现的次数
-                .apply(new WindowFunction<SensorData, Tuple4<Long, Long, Long, Integer>, Long, TimeWindow>() {
+                // 滑动计数窗口
+                .countWindow(10, 2)
+                // 计算窗口内每个ID的value的平均值
+                .aggregate(new AggregateFunction<SensorData, Tuple2<Double, Integer>, Double>() {
                     @Override
-                    public void apply(Long key, TimeWindow window, Iterable<SensorData> input,
-                                      Collector<Tuple4<Long, Long, Long, Integer>> out) throws Exception {
-                        long start = window.getStart();
-                        long end = window.getEnd();
-                        AtomicInteger count = new AtomicInteger();
-                        input.forEach(data -> count.getAndIncrement());
-                        int result = count.get();
-                        out.collect(Tuple4.of(start, end, key, result));
+                    public Tuple2<Double, Integer> createAccumulator() {
+                        return Tuple2.of(0.0, 0);
+                    }
+
+                    @Override
+                    public Tuple2<Double, Integer> add(SensorData value, Tuple2<Double, Integer> accumulator) {
+                        return Tuple2.of(accumulator.f0 + value.getValue(), accumulator.f1 + 1);
+                    }
+
+                    @Override
+                    public Double getResult(Tuple2<Double, Integer> accumulator) {
+                        return accumulator.f0 / accumulator.f1;
+                    }
+
+                    @Override
+                    public Tuple2<Double, Integer> merge(Tuple2<Double, Integer> a, Tuple2<Double, Integer> b) {
+                        return Tuple2.of(a.f0 + b.f0, a.f1 + b.f1);
                     }
                 })
                 .print();

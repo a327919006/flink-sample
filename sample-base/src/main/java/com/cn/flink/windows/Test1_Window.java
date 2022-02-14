@@ -53,6 +53,8 @@ public class Test1_Window {
                 // .countWindow(10)
                 // 滑动计数窗口
                 // .countWindow(10, 2)
+                // 调用window后还是可以调用原先的min/max/sum等函数，其他业务可以使用aggregate或reduce等
+                // .min("value")
                 // 计算窗口内每个ID出现的次数
                 .aggregate(new AggregateFunction<SensorData, Integer, Integer>() {
                     @Override
