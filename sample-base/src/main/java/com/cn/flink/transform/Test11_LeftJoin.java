@@ -25,7 +25,7 @@ public class Test11_LeftJoin {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
 
-        DataStream<SensorData> streamOne = env.socketTextStream("127.0.0.1", 7777)
+        DataStream<SensorData> streamLeft = env.socketTextStream("127.0.0.1", 7777)
                 .map((MapFunction<String, SensorData>) value -> {
                     String[] split = value.split(",");
                     SensorData sensorData = new SensorData();
@@ -36,7 +36,7 @@ public class Test11_LeftJoin {
                     return sensorData;
                 }, TypeInformation.of(SensorData.class));
 
-        DataStream<SensorSubData> streamTwo = env.socketTextStream("127.0.0.1", 8888)
+        DataStream<SensorSubData> streamRight = env.socketTextStream("127.0.0.1", 8888)
                 .map((MapFunction<String, SensorSubData>) value -> {
                     String[] split = value.split(",");
                     SensorSubData sensorData = new SensorSubData();
@@ -47,7 +47,7 @@ public class Test11_LeftJoin {
                     return sensorData;
                 }, TypeInformation.of(SensorSubData.class));
 
-        streamOne.coGroup(streamTwo)
+        streamLeft.coGroup(streamRight)
                 .where((KeySelector<SensorData, Long>) SensorData::getId)
                 .equalTo((KeySelector<SensorSubData, Long>) SensorSubData::getId)
                 .window(TumblingProcessingTimeWindows.of(Time.seconds(10)))
@@ -57,6 +57,8 @@ public class Test11_LeftJoin {
                     first.forEach(firstList::add);
                     second.forEach(secondList::add);
 
+                    // leftJoin，先遍历first，再遍历second
+                    // rightJoin，先遍历right，再遍历first
                     for (SensorData sensorData : firstList) {
                         // 定义flag，表示left流中的key在right流中是否存在
                         boolean hasSubData = false;
@@ -74,8 +76,6 @@ public class Test11_LeftJoin {
                             out.collect(new SensorDataResult(sensorData.getId(), sensorData.getName(), 0D, sensorData.getTimestamp()));
                         }
                     }
-
-
                 }, TypeInformation.of(SensorDataResult.class))
                 .print();
 

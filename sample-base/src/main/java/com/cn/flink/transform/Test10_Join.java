@@ -23,7 +23,7 @@ public class Test10_Join {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
 
-        DataStream<SensorData> streamOne = env.socketTextStream("127.0.0.1", 7777)
+        DataStream<SensorData> streamLeft = env.socketTextStream("127.0.0.1", 7777)
                 .map((MapFunction<String, SensorData>) value -> {
                     String[] split = value.split(",");
                     SensorData sensorData = new SensorData();
@@ -34,7 +34,7 @@ public class Test10_Join {
                     return sensorData;
                 }, TypeInformation.of(SensorData.class));
 
-        DataStream<SensorSubData> streamTwo = env.socketTextStream("127.0.0.1", 8888)
+        DataStream<SensorSubData> streamRight = env.socketTextStream("127.0.0.1", 8888)
                 .map((MapFunction<String, SensorSubData>) value -> {
                     String[] split = value.split(",");
                     SensorSubData sensorData = new SensorSubData();
@@ -45,7 +45,7 @@ public class Test10_Join {
                     return sensorData;
                 }, TypeInformation.of(SensorSubData.class));
 
-        streamOne.join(streamTwo)
+        streamLeft.join(streamRight)
                 .where((KeySelector<SensorData, Long>) SensorData::getId)
                 .equalTo((KeySelector<SensorSubData, Long>) SensorSubData::getId)
                 .window(TumblingProcessingTimeWindows.of(Time.seconds(10)))
