@@ -3,6 +3,7 @@ package com.cn.flink.windows;
 import com.cn.flink.domain.SensorData;
 import org.apache.flink.api.common.eventtime.WatermarkGenerator;
 import org.apache.flink.api.common.eventtime.WatermarkGeneratorSupplier;
+import org.apache.flink.api.common.eventtime.WatermarkOutput;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -37,6 +38,22 @@ public class Test5_EventWindow {
                     sensorData.setTimestamp(Long.parseLong(split[3]));
                     return sensorData;
                 }, TypeInformation.of(SensorData.class))
+                .assignTimestampsAndWatermarks(WatermarkStrategy.forGenerator(new WatermarkGeneratorSupplier<SensorData>() {
+                    @Override
+                    public WatermarkGenerator<SensorData> createWatermarkGenerator(Context context) {
+                        return new WatermarkGenerator<SensorData>() {
+                            @Override
+                            public void onEvent(SensorData event, long eventTimestamp, WatermarkOutput output) {
+
+                            }
+
+                            @Override
+                            public void onPeriodicEmit(WatermarkOutput output) {
+
+                            }
+                        };
+                    }
+                }))
                 .assignTimestampsAndWatermarks(WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofSeconds(5)))
                 .keyBy((KeySelector<SensorData, Long>) SensorData::getId)
                 .window(TumblingEventTimeWindows.of(Time.seconds(10)))
