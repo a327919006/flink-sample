@@ -2,6 +2,7 @@ package com.cn.flink.state;
 
 import com.cn.flink.domain.SensorData;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.state.*;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -42,12 +43,14 @@ public class Test2_KeyState {
         private ValueState<Integer> valueState;
         private ListState<String> listState;
         private MapState<String, Integer> mapState;
+        private ReducingState<String> reducingState;
 
         @Override
         public void open(Configuration parameters) throws Exception {
             valueState = getRuntimeContext().getState(new ValueStateDescriptor<>("value-count", Integer.class));
             listState = getRuntimeContext().getListState(new ListStateDescriptor<>("list-state", String.class));
             mapState = getRuntimeContext().getMapState(new MapStateDescriptor<>("map-state", String.class, Integer.class));
+            reducingState = getRuntimeContext().getReducingState(new ReducingStateDescriptor<>("reducing-state", (ReduceFunction<String>) (value1, value2) -> value1 + value2, String.class));
         }
 
         @Override
@@ -68,6 +71,7 @@ public class Test2_KeyState {
             }
 
             mapState.put("test" + count, count);
+
             return count;
         }
     }
