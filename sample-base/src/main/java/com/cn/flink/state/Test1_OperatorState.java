@@ -12,7 +12,7 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 /**
- * map一对一转换，一个输入只能通过return返回一个输出
+ * 算子状态，针对当前算子的状态
  *
  * @author Chen Nan
  */
