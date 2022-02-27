@@ -4,7 +4,9 @@ import com.cn.flink.domain.SensorData;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
+import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 /**
@@ -18,6 +20,8 @@ public class Test4_StateBackend {
         env.setParallelism(1);
 
         // 设置状态后端
+        // env.setStateBackend(new MemoryStateBackend());
+        // env.setStateBackend(new FsStateBackend("/data/state/backend"));
         env.setStateBackend(new HashMapStateBackend());
 
         env.socketTextStream("127.0.0.1", 7777)
