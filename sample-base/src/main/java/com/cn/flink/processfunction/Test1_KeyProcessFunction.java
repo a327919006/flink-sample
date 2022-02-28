@@ -1,18 +1,13 @@
 package com.cn.flink.processfunction;
 
 import com.cn.flink.domain.SensorData;
-import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.TimerService;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
-import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
-
-import java.io.File;
 
 /**
  * KeyProcessFunction，Timer定时任务
@@ -50,6 +45,8 @@ public class Test1_KeyProcessFunction {
                     public void onTimer(long timestamp, OnTimerContext ctx, Collector<Double> out) throws Exception {
                         System.out.println(timestamp + "定时器触发");
                         out.collect(123D);
+                        // 侧输出流
+                        // ctx.output();
                     }
                 })
                 .print();
