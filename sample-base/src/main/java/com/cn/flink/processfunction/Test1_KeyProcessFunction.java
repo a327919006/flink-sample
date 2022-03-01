@@ -29,7 +29,6 @@ public class Test1_KeyProcessFunction {
                     sensorData.setTimestamp(Long.parseLong(split[3]));
                     return sensorData;
                 }, TypeInformation.of(SensorData.class))
-                // 使用window需先keyBy，如根据ID分组
                 .keyBy((KeySelector<SensorData, Long>) SensorData::getId)
                 .process(new KeyedProcessFunction<Long, SensorData, Double>() {
                     @Override
