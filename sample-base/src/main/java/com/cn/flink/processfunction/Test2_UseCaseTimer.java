@@ -16,7 +16,7 @@ import org.apache.flink.util.Collector;
  *
  * @author Chen Nan
  */
-public class Test2_UseCase {
+public class Test2_UseCaseTimer {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
