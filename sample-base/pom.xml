@@ -25,6 +25,11 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients_${scala.library.version}</artifactId>
         </dependency>
+        <!--flink-table-api-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-planner_${scala.library.version}</artifactId>
+        </dependency>
 
         <!--kafka-->
         <dependency>
