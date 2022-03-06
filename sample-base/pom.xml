@@ -30,6 +30,10 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner_${scala.library.version}</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-csv</artifactId>
+        </dependency>
 
         <!--kafka-->
         <dependency>
