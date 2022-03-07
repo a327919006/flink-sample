@@ -8,8 +8,10 @@ import org.apache.flink.types.Row;
 
 import java.io.File;
 
+import static org.apache.flink.table.api.Expressions.$;
+
 /**
- * map一对一转换，一个输入只能通过return返回一个输出
+ * TableAPI和SQL用法
  *
  * @author Chen Nan
  */
@@ -35,17 +37,26 @@ public class Test2_CommonAPI {
                 .column("timestamp", DataTypes.BIGINT())
                 .build();
 
-        TableDescriptor filesystem = TableDescriptor.forConnector("filesystem")
+        TableDescriptor tableDesc = TableDescriptor.forConnector("filesystem")
                 .schema(schema)
                 .option("path", filePath)
                 .format("csv")
                 .build();
-        tableEnv.createTemporaryTable("inputTable", filesystem);
+        tableEnv.createTemporaryTable("inputTable", tableDesc);
 
         Table inputTable = tableEnv.from("inputTable");
+        Table aggTable = inputTable.groupBy($("id"))
+                .select($("id").as("did"),
+                        $("value").max().as("maxValue"));
+
+        Table sqlAggTable = tableEnv.sqlQuery("select id, max(`value`) as maxVal from inputTable group by id");
+
+
         // 输出表结构
         inputTable.printSchema();
-        tableEnv.toDataStream(inputTable, SensorData.class).print();
+        tableEnv.toDataStream(inputTable, SensorData.class).print("input");
+        tableEnv.toChangelogStream(aggTable).print("agg");
+        tableEnv.toChangelogStream(sqlAggTable).print("sqlAgg");
 
         env.execute();
     }

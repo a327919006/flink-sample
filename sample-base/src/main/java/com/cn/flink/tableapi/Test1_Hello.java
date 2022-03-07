@@ -14,7 +14,7 @@ import java.io.File;
 import static org.apache.flink.table.api.Expressions.$;
 
 /**
- * map一对一转换，一个输入只能通过return返回一个输出
+ * TableAPI和SQL入门示例
  *
  * @author Chen Nan
  */
