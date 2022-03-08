@@ -55,6 +55,8 @@ public class Test2_CommonAPI {
         // 输出表结构
         inputTable.printSchema();
         tableEnv.toDataStream(inputTable, SensorData.class).print("input");
+
+        // 聚合操作要使用ChangelogStream，因为聚合结果会改变，每次会输出两条数据，旧值与新值
         tableEnv.toChangelogStream(aggTable).print("agg");
         tableEnv.toChangelogStream(sqlAggTable).print("sqlAgg");
 
