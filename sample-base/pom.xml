@@ -61,6 +61,11 @@
             <version>${flink.version}</version>
         </dependency>
 
+        <!--jdbc-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-jdbc_${scala.library.version}</artifactId>
+        </dependency>
         <!--mysql-->
         <dependency>
             <groupId>mysql</groupId>
