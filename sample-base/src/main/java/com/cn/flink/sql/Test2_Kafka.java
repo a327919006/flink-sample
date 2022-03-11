@@ -10,15 +10,10 @@ import java.io.File;
  *
  * @author Chen Nan
  */
-public class Test1_Hello {
+public class Test2_Kafka {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
-
-        File intputFile = new File("sample-base\\src\\main\\resources\\data.txt");
-        String intputFilePath = intputFile.getAbsolutePath();
-        File outputFile = new File("sample-base\\src\\main\\resources\\result");
-        String outputFilePath = outputFile.getAbsolutePath();
 
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
@@ -28,8 +23,11 @@ public class Test1_Hello {
                 "  `value` DECIMAL(10,2)," +
                 "  `time` BIGINT" +
                 ") WITH (" +
-                "  'connector' = 'filesystem'," +
-                "  'path' = '" + intputFilePath + "'," +
+                "  'connector' = 'kafka'," +
+                "  'topic' = 'sensorInput'," +
+                "  'properties.bootstrap.servers' = 'localhost:9092'," +
+                "  'properties.group.id' = 'flinkTest'," +
+                "  'scan.startup.mode' = 'earliest-offset'," +
                 "  'format' = 'csv'" +
                 ")";
         String outputTableSql = "CREATE TABLE outputTable (" +
@@ -38,8 +36,9 @@ public class Test1_Hello {
                 "  `value` DECIMAL(10,2)," +
                 "  `time` BIGINT" +
                 ") WITH (" +
-                "  'connector' = 'filesystem'," +
-                "  'path' = '" + outputFilePath + "'," +
+                "  'connector' = 'kafka'," +
+                "  'topic' = 'sensorOutput'," +
+                "  'properties.bootstrap.servers' = 'localhost:9092'," +
                 "  'format' = 'json'" +
                 ")";
 
