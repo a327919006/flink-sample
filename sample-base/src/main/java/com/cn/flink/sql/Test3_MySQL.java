@@ -3,14 +3,13 @@ package com.cn.flink.sql;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
-import java.io.File;
-
 /**
- * 使用sql从Kafka一个topic读取数据到另一个topic
+ * 使用sql从Mysql一个表读取数据到另一个表
+ * 会自动实现upsert效果，即INSERT .. ON DUPLICATE KEY UPDATE ..
  *
  * @author Chen Nan
  */
-public class Test2_Kafka {
+public class Test3_MySQL {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
@@ -21,25 +20,27 @@ public class Test2_Kafka {
                 "  id BIGINT," +
                 "  name STRING," +
                 "  `value` DECIMAL(10,2)," +
-                "  `time` BIGINT" +
+                "  `time` BIGINT," +
+                "  PRIMARY KEY (id) NOT ENFORCED" +
                 ") WITH (" +
-                "  'connector' = 'kafka'," +
-                "  'topic' = 'sensorInput'," +
-                "  'properties.bootstrap.servers' = 'localhost:9092'," +
-                "  'properties.group.id' = 'flinkTest'," +
-                "  'scan.startup.mode' = 'earliest-offset'," +
-                "  'format' = 'csv'" +
+                "  'connector' = 'jdbc'," +
+                "  'url' = 'jdbc:mysql://127.0.0.1:3306/cntest?useSSL=false'," +
+                "  'table-name' = 'sensor_data'," +
+                "  'username' = 'root'," +
+                "  'password' = 'chennan'" +
                 ")";
         String outputTableSql = "CREATE TABLE outputTable (" +
-                "  did BIGINT," +
-                "  deviceName STRING," +
+                "  id BIGINT," +
+                "  name STRING," +
                 "  `value` DECIMAL(10,2)," +
-                "  `time` BIGINT" +
+                "  `time` BIGINT," +
+                "  PRIMARY KEY (id) NOT ENFORCED" +
                 ") WITH (" +
-                "  'connector' = 'kafka'," +
-                "  'topic' = 'sensorOutput'," +
-                "  'properties.bootstrap.servers' = 'localhost:9092'," +
-                "  'format' = 'json'" +
+                "  'connector' = 'jdbc'," +
+                "  'url' = 'jdbc:mysql://127.0.0.1:3306/cntest?useSSL=false'," +
+                "  'table-name' = 'sensor_output'," +
+                "  'username' = 'root'," +
+                "  'password' = 'chennan'" +
                 ")";
 
         String insertSql = "INSERT INTO outputTable " +

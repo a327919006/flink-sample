@@ -6,7 +6,7 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import java.io.File;
 
 /**
- * TableAPI和SQL入门示例
+ * 使用sql从文件系统读取数据到另一个文件
  *
  * @author Chen Nan
  */
