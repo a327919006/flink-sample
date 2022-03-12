@@ -5,7 +5,8 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 /**
  * 使用sql从Mysql一个表读取数据到另一个表
- * 会自动实现upsert效果，即INSERT .. ON DUPLICATE KEY UPDATE ..
+ * 设置主键后会自动实现upsert效果，即INSERT .. ON DUPLICATE KEY UPDATE ..
+ * 否则以Append模式
  *
  * @author Chen Nan
  */
