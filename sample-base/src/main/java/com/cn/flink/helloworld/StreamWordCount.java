@@ -13,6 +13,11 @@ import org.apache.flink.util.Collector;
  */
 public class StreamWordCount {
     public static void main(String[] args) throws Exception {
+        ParameterTool pt = ParameterTool
+                .fromPropertiesFile(WordCount.class.getResourceAsStream("/config.properties"))
+                .mergeWith(ParameterTool.fromArgs(args))
+                .mergeWith(ParameterTool.fromSystemProperties());
+
         // 创建流处理执行环境
         StreamExecutionEnvironment env = StreamContextEnvironment.getExecutionEnvironment();
 
@@ -20,9 +25,8 @@ public class StreamWordCount {
         env.setParallelism(1);
 
         // 从args中获取参数
-        ParameterTool parameterTool = ParameterTool.fromArgs(args);
-        String host = parameterTool.get("host", "192.168.157.138");
-        int port = parameterTool.getInt("port", 7777);
+        String host = pt.get("host", "192.168.157.138");
+        int port = pt.getInt("port", 7777);
 
         // 从socket文本流读取数据，linux服务器运行nc -lk 7777
         DataStream<String> dataSource = env.socketTextStream(host, port);

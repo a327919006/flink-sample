@@ -6,6 +6,8 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.util.Collector;
 
+import java.io.File;
+
 /**
  * @author Chen Nan
  */
@@ -16,8 +18,8 @@ public class WordCount {
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
 
         // 从文件中读取数据
-        String filePath = "D:\\share\\flink-sample\\sample-wc\\src\\main\\resources\\hello.txt";
-        DataSet<String> dataSource = env.readTextFile(filePath);
+        File file = new File("sample-base\\src\\main\\resources\\hello.txt");
+        DataSet<String> dataSource = env.readTextFile(file.getAbsolutePath());
 
         // 对数据集进行处理，按空格分词展开，转换成(word, 1)二元组进行统计
         // 按照第一个位置的word分组
