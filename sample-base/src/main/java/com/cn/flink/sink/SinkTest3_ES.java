@@ -2,24 +2,20 @@ package com.cn.flink.sink;
 
 import com.cn.flink.domain.SensorData;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.elasticsearch.ElasticsearchSinkFunction;
-import org.apache.flink.streaming.connectors.elasticsearch.RequestIndexer;
 import org.apache.flink.streaming.connectors.elasticsearch7.ElasticsearchSink;
-import org.apache.flink.streaming.connectors.redis.RedisSink;
-import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisPoolConfig;
-import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand;
-import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommandDescription;
-import org.apache.flink.streaming.connectors.redis.common.mapper.RedisMapper;
+import org.apache.flink.streaming.connectors.elasticsearch7.RestClientFactory;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.Requests;
 
 import java.io.File;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,9 +29,14 @@ import java.util.Map;
 public class SinkTest3_ES {
 
     public static void main(String[] args) throws Exception {
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(1);
+
+        // 如果是es集群，则添加多个节点
         List<HttpHost> hosts = new ArrayList<>();
         hosts.add(new HttpHost("127.0.0.1", 9200));
-        ElasticsearchSink<SensorData> sink = new ElasticsearchSink
+
+        ElasticsearchSink.Builder<SensorData> sinkBuilder = new ElasticsearchSink
                 .Builder<>(hosts,
                 (ElasticsearchSinkFunction<SensorData>) (sensorData, runtimeContext, requestIndexer) -> {
                     Map<String, String> dataSource = new HashMap<>();
@@ -48,11 +49,27 @@ public class SinkTest3_ES {
                             .index("sensor_data")
                             .source(dataSource);
                     requestIndexer.add(indexRequest);
-                })
-                .build();
+                });
 
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(1);
+        // 如果ES有密码，则需设置
+        String username = "username";
+        String password = "password";
+        RestClientFactory restClientFactory = (RestClientFactory) restClientBuilder -> {
+            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(AuthScope.ANY,
+                    new UsernamePasswordCredentials(username, password));
+            restClientBuilder.setHttpClientConfigCallback(httpAsyncClientBuilder -> {
+                httpAsyncClientBuilder.disableAuthCaching();
+                return httpAsyncClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+            });
+        };
+        sinkBuilder.setRestClientFactory(restClientFactory);
+        // 批量写入条数
+        sinkBuilder.setBulkFlushMaxActions(1000);
+        // 批量写入间隔
+        sinkBuilder.setBulkFlushInterval(500);
+
+        ElasticsearchSink<SensorData> sink = sinkBuilder.build();
 
         File file = new File("sample-base\\src\\main\\resources\\data.txt");
         env.readTextFile(file.getAbsolutePath())
