@@ -18,13 +18,14 @@ public class BoundedStreamWordCount {
     public static void main(String[] args) throws Exception {
         // 创建流处理执行环境
         StreamExecutionEnvironment env = StreamContextEnvironment.getExecutionEnvironment();
+        // 设置并行度，默认值 = 当前计算机的CPU逻辑核数（设置成1即单线程处理）
+        // 如果设置为多并行度，则同一个word会被分配到相同的slot处理
         env.setParallelism(1);
 
         // 从文件中读取数据
         File file = new File("sample-base\\src\\main\\resources\\hello.txt");
         DataStream<String> dataSource = env.readTextFile(file.getAbsolutePath());
 
-        // 基于数据流进行转换计算，每一步都支持设置并行度
         dataSource.flatMap(
                 (FlatMapFunction<String, Tuple2<String, Integer>>) (value, out) -> {
                     String[] words = value.split(" ");
@@ -35,8 +36,8 @@ public class BoundedStreamWordCount {
                 })
                 .returns(Types.TUPLE(Types.STRING, Types.INT)) // 指定flatMap输出类型
                 .keyBy(item -> item.f0)
-                .sum(1).setParallelism(1)
-                .print().setParallelism(1);
+                .sum(1)
+                .print();
 
         // 执行任务
         env.execute("StreamWordCount");

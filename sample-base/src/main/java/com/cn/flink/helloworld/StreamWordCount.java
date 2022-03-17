@@ -20,10 +20,7 @@ public class StreamWordCount {
                 .mergeWith(ParameterTool.fromArgs(args))
                 .mergeWith(ParameterTool.fromSystemProperties());
 
-        // 创建流处理执行环境
         StreamExecutionEnvironment env = StreamContextEnvironment.getExecutionEnvironment();
-
-        // 设置并行度，默认值 = 当前计算机的CPU逻辑核数（设置成1即单线程处理）
         env.setParallelism(1);
 
         // 从args中获取参数
