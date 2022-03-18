@@ -9,7 +9,7 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import java.io.File;
 
 /**
- * 批处理，结果统一输出
+ * 批处理，结果统一输出，从1.12起DataStream已经实现流批一体
  *
  * @author Chen Nan
  */
