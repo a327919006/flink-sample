@@ -13,7 +13,7 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 import java.time.Duration;
 
 /**
- * 时间语义，事件时间
+ * 时间语义，事件时间，水位线Watermark
  * 测试数据：
  * 1,sensor1,11,1640000001000
  * 1,sensor1,12,1640000002000
