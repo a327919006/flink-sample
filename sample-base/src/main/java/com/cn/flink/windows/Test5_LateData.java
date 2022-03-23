@@ -27,6 +27,8 @@ import java.time.Duration;
  * 1,sensor1,14,1640000004000
  * 1,sensor1,15,1640000005000
  * 1,sensor1,16,1640000006000
+ * 1,sensor1,19,1640000009000
+ * 1,sensor1,20,1640000010000
  * 1,sensor1,22,1640000012000
  * 1,sensor1,23,1640000001000
  * 1,sensor1,18,1640000008000
@@ -66,6 +68,10 @@ public class Test5_LateData {
                 // 设置窗口延迟x秒关闭，即示例中窗口为10s，允许乱序2s，此时12s的数据到达时会先输出一次0-10s的结果
                 // 如果在15s数据到达前，还有0-10s内的数据，则还会触发计算，并输出结果
                 // 如果在15s数据到达后，还有0-10s内的数据，则会写入测输出流
+                // allowedLateness与forBoundedOutOfOrderness不同点：
+                // 水位线在窗口周期10s到时不会触发计算，是在12s才会触发一次计算
+                // allowedLateness是在窗口周期10s到时先触发一次计算（如果同时配置了水位线则12s才会触发一次计算）
+                // 之后每次有迟到数据都会触发一次计算，直到15s，才会真正关闭窗口
                 .allowedLateness(Time.seconds(3))
                 // 使用侧输出流，将窗口关闭后才到达的数据打上标签，防止数据丢失
                 .sideOutputLateData(outputTag)
