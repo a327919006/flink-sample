@@ -32,6 +32,10 @@ public class Test6_UseCase1 {
                 }, TypeInformation.of(SensorData.class))
                 .keyBy((KeySelector<SensorData, Long>) SensorData::getId)
                 .window(TumblingProcessingTimeWindows.of(Time.seconds(5)))
+                // 自定义触发规则，触发计算窗口内的数据，内置EventTimeTrigger、ProcessingTimeTrigger、CountTrigger
+                // .trigger()
+                // 自定义移除器，根据自定义业务移除某些数据
+                // .evictor()
                 // AggregateFunction计算窗口内每个ID出现的次数
                 // ProcessWindowFunction拼接上时间窗口信息
                 .aggregate(new AggregateFunction<SensorData, Integer, Integer>() {
