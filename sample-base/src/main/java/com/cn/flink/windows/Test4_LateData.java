@@ -41,6 +41,7 @@ public class Test4_LateData {
                 .keyBy((KeySelector<SensorData, Long>) SensorData::getId)
                 // 滑动计数窗口
                 .window(TumblingEventTimeWindows.of(Time.seconds(10)))
+                // 设置窗口延迟5秒关闭
                 .allowedLateness(Time.seconds(5))
                 .sideOutputLateData(outputTag)
                 .maxBy("value");
