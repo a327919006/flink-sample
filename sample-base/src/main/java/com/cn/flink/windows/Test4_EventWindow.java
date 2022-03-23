@@ -37,7 +37,7 @@ import java.time.Duration;
  *
  * @author Chen Nan
  */
-public class Test5_EventWindow {
+public class Test4_EventWindow {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
