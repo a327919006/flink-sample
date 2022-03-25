@@ -13,6 +13,7 @@ public class SourceTest4_Customer {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.addSource(new MySourceFunction())
+                .setParallelism(2)
                 .print();
 
         env.execute();

@@ -25,8 +25,10 @@ public class SourceTest1_Collection {
                 new SensorData(2L, "sensor2", 20D, System.currentTimeMillis()),
                 new SensorData(3L, "sensor3", 30D, System.currentTimeMillis())
         );
+        // 从集合获取fromCollection
         env.fromCollection(dataList).print("element");
 
+        // 从元素获取fromElements
         env.fromElements(1, 2, 3).print("collection");
 
         env.execute("CollectionSourceTest");
