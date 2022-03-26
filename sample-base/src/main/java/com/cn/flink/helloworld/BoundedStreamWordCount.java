@@ -2,7 +2,7 @@ package com.cn.flink.helloworld;
 
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.client.program.StreamContextEnvironment;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -41,7 +41,10 @@ public class BoundedStreamWordCount {
                         out.collect(new Tuple2<>(word, 1));
                     }
                 })
-                .returns(Types.TUPLE(Types.STRING, Types.INT)) // 指定flatMap输出类型
+                // 指定flatMap输出类型，方式一
+                // .returns(Types.TUPLE(Types.STRING, Types.INT))
+                // 指定flatMap输出类型，方式二，适用于更复杂的泛型，层层嵌套的泛型
+                .returns(new TypeHint<Tuple2<String, Integer>>() {})
                 .keyBy(item -> item.f0)
                 .sum(1)
                 .print();
