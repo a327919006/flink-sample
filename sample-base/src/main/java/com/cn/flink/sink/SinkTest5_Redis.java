@@ -17,9 +17,12 @@ import java.io.File;
  *
  * @author Chen Nan
  */
-public class SinkTest2_Redis {
+public class SinkTest5_Redis {
 
     public static void main(String[] args) throws Exception {
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(1);
+
         FlinkJedisPoolConfig config = new FlinkJedisPoolConfig.Builder()
                 .setHost("127.0.0.1")
                 .setPort(6379)
@@ -29,23 +32,22 @@ public class SinkTest2_Redis {
         RedisSink<SensorData> sink = new RedisSink<>(config, new RedisMapper<SensorData>() {
             @Override
             public RedisCommandDescription getCommandDescription() {
+                // 定义使用的redis命令以及redis的key
                 return new RedisCommandDescription(RedisCommand.HSET, "sensor_data");
             }
 
             @Override
             public String getKeyFromData(SensorData data) {
+                // 定义hash的key
                 return String.valueOf(data.getId());
             }
 
             @Override
             public String getValueFromData(SensorData data) {
+                // 定义hash的值
                 return String.valueOf(data.getValue());
             }
         });
-
-
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(1);
 
         File file = new File("sample-base\\src\\main\\resources\\data.txt");
         env.readTextFile(file.getAbsolutePath())

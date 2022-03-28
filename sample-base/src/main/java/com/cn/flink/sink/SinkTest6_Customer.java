@@ -24,7 +24,7 @@ import java.sql.PreparedStatement;
  *
  * @author Chen Nan
  */
-public class SinkTest5_Customer {
+public class SinkTest6_Customer {
 
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();

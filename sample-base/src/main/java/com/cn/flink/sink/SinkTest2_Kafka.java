@@ -13,7 +13,7 @@ import java.io.File;
  *
  * @author Chen Nan
  */
-public class SinkTest1_Kafka {
+public class SinkTest2_Kafka {
 
     public static void main(String[] args) throws Exception {
         KafkaSink<String> sink = KafkaSink.<String>builder()
