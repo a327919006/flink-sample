@@ -11,7 +11,7 @@ import java.io.File;
  *
  * @author Chen Nan
  */
-public class SourceTest2_File {
+public class SourceTest2_FileBatch {
 
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
