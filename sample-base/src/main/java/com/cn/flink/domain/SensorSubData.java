@@ -15,4 +15,14 @@ public class SensorSubData {
     private String name;
     private Double value;
     private Long timestamp;
+
+    @Override
+    public String toString() {
+        return "SensorSubData{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", value=" + value +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }

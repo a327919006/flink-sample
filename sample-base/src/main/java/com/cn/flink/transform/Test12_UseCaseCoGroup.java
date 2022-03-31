@@ -1,9 +1,10 @@
 package com.cn.flink.transform;
 
 import com.cn.flink.domain.SensorData;
+import com.cn.flink.domain.SensorDataDetail;
 import com.cn.flink.domain.SensorDataResult;
 import com.cn.flink.domain.SensorSubData;
-import org.apache.flink.api.common.functions.JoinFunction;
+import org.apache.flink.api.common.functions.CoGroupFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
@@ -12,23 +13,22 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * JoinFunction合流，实现innerJoin
- * 两个流在窗口时间内都有数据，则会输出结果，与SQL中的innerJoin相同
- * 举例1:
- * 左流1条数据：1,sensor1,10,1640000000000
- * 右流1条数据：1,sensor1,20,1640000000000
- * join结果输出1条：1,sensor1,30,1640000000000
- * <p>
- * 举例2：
- * 左流1条数据：1,sensor1,10,1640000000000
- * 右流2条数据：1,sensor1,20,1640000000000和1,sensor1,30,1640000000000
- * join结果输出2条：1,sensor1,30,1640000000000和1,sensor1,40,1640000000000
- * 结果为左流分别与右流join的结果，与MySQL中的join类似
+ * CoGroupFunction合流，允许降窗口周期内的数据在窗口结束时统一处理
+ * 实现窗口周期内左流中的数据与右流中的合并
+ * 应用场景：物联网，设备每隔1分钟内会上报一次统计数据和明细数据，分开在两个kafka主题
+ * 此时希望将统计数据和明细数据合并成一个字符串串保存
+ * 举例：
+ * 左流1条数据：1,sensor1,30,1640000000000
+ * 右流2条数据：1,sensor1,10,1640000000000和1,sensor1,20,1640000000000
+ * join结果输出1条：主1,sensor1,30,1640000000000，明细：1,sensor1,10,1640000000000和1,sensor1,20,1640000000000
  *
  * @author Chen Nan
  */
-public class Test10_Join {
+public class Test12_UseCaseCoGroup {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
@@ -55,18 +55,25 @@ public class Test10_Join {
                     return sensorData;
                 }, TypeInformation.of(SensorSubData.class));
 
-        streamLeft.join(streamRight)
+        streamLeft.coGroup(streamRight)
                 .where((KeySelector<SensorData, Long>) SensorData::getId)
                 .equalTo((KeySelector<SensorSubData, Long>) SensorSubData::getId)
                 .window(TumblingProcessingTimeWindows.of(Time.seconds(10)))
-                .apply((JoinFunction<SensorData, SensorSubData, SensorDataResult>) (first, second) -> {
-                    double result = first.getValue() + second.getValue();
-                    Long timestamp = first.getTimestamp();
-                    if (second.getTimestamp() > timestamp) {
-                        timestamp = second.getTimestamp();
+                .apply((CoGroupFunction<SensorData, SensorSubData, SensorDataDetail>) (first, second, out) -> {
+                    List<SensorData> firstList = new ArrayList<>();
+                    List<SensorSubData> secondList = new ArrayList<>();
+                    first.forEach(firstList::add);
+                    second.forEach(secondList::add);
+
+                    if (firstList.size() > 0 && secondList.size() > 0) {
+                        SensorDataDetail detail = new SensorDataDetail();
+                        SensorData sensorData = firstList.get(0);
+                        detail.setSensorData(sensorData);
+                        detail.setSensorSubDataList(secondList);
+                        out.collect(detail);
                     }
-                    return new SensorDataResult(first.getId(), first.getName(), result, timestamp);
-                })
+
+                }, TypeInformation.of(SensorDataDetail.class))
                 .print();
 
         env.execute();

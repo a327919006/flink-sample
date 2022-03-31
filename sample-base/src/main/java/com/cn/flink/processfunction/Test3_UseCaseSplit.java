@@ -13,6 +13,8 @@ import org.apache.flink.util.OutputTag;
 import java.io.File;
 
 /**
+ * 分流，旧版中是split方法实现，从flink1.13起弃用
+ * 新版使用侧输出流实现分流效果。
  * 使用案例：分流，根据value值大小，按value是否大于20分成两个流
  *
  * @author Chen Nan
