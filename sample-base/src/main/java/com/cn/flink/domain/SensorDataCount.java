@@ -11,7 +11,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SensorDataCount implements Comparable<SensorDataCount> {
+public class SensorDataCount {
     private Long id;
     private Integer count;
     private Long windowStart;
@@ -25,10 +25,5 @@ public class SensorDataCount implements Comparable<SensorDataCount> {
                 ", windowStart=" + DateFormatUtils.format(windowStart, DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()) +
                 ", windowEnd=" + DateFormatUtils.format(windowEnd, DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()) +
                 '}';
-    }
-
-    @Override
-    public int compareTo(SensorDataCount o) {
-        return o.getCount().compareTo(this.getCount());
     }
 }

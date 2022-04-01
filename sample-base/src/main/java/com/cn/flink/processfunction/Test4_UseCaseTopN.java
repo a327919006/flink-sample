@@ -2,6 +2,8 @@ package com.cn.flink.processfunction;
 
 import com.cn.flink.domain.SensorData;
 import com.cn.flink.domain.SensorDataCount;
+import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.state.ListState;
@@ -10,17 +12,15 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,8 +45,13 @@ public class Test4_UseCaseTopN {
                     sensorData.setTimestamp(Long.parseLong(split[3]));
                     return sensorData;
                 }, TypeInformation.of(SensorData.class))
+                .assignTimestampsAndWatermarks(
+                        WatermarkStrategy.<SensorData>forMonotonousTimestamps()
+                                .withTimestampAssigner((SerializableTimestampAssigner<SensorData>)
+                                        (element, recordTimestamp) -> element.getTimestamp())
+                )
                 .keyBy((KeySelector<SensorData, Long>) SensorData::getId)
-                .window(TumblingProcessingTimeWindows.of(Time.seconds(5)))
+                .window(TumblingEventTimeWindows.of(Time.seconds(5)))
                 // 自定义触发规则，触发计算窗口内的数据，内置EventTimeTrigger、ProcessingTimeTrigger、CountTrigger
                 // .trigger()
                 // 自定义移除器，根据自定义业务移除某些数据
@@ -106,7 +111,8 @@ public class Test4_UseCaseTopN {
                     public void processElement(SensorDataCount value, Context ctx, Collector<SensorDataCount> out) throws Exception {
                         listState.add(value);
 
-                        ctx.timerService().registerProcessingTimeTimer(ctx.getCurrentKey() + 1);
+                        System.out.println(ctx.getCurrentKey());
+                        ctx.timerService().registerEventTimeTimer(ctx.getCurrentKey() + 1);
                     }
 
                     @Override
@@ -115,7 +121,7 @@ public class Test4_UseCaseTopN {
                         for (SensorDataCount data : listState.get()) {
                             list.add(data);
                         }
-                        Collections.sort(list);
+                        Collections.sort(list, (o1, o2) -> o2.getCount().compareTo(o1.getCount()));
 
                         for (int i = 0; i < 2; i++) {
                             if (list.size() > i) {
