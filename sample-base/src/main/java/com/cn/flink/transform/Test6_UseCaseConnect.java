@@ -19,6 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 效果通Test12_UseCaseCoGroup
+ * 实现窗口周期内左流中的数据与右流中的合并
+ * 应用场景：物联网，设备每隔1分钟内会上报一次统计数据和明细数据，分开在两个kafka主题
+ * 此时希望将统计数据和明细数据合并成一个字符串串保存（在一个窗口周期内统计数据只有一条，明细数据有多条）
+ * 举例：
+ * 左流1条数据：1,sensor1,30,1640000000000
+ * 右流2条数据：1,sensor1,10,1640000000000和1,sensor1,20,1640000000000
+ * 结果输出1条：主1,sensor1,30,1640000000000，明细：1,sensor1,10,1640000000000和1,sensor1,20,1640000000000
+ * 如果在窗口周期内没有主数据，则不输出结果
+ *
  * @author Chen Nan
  */
 public class Test6_UseCaseConnect {
@@ -79,7 +89,7 @@ public class Test6_UseCaseConnect {
                     public void onTimer(long timestamp, OnTimerContext ctx, Collector<SensorDataDetail> out) throws Exception {
                         SensorData sensorData = dataState.value();
                         if (sensorData == null) {
-                            System.out.println("clear");
+                            System.out.println("sensorData缺失，清空subData");
                             subDataListState.clear();
                             return;
                         }

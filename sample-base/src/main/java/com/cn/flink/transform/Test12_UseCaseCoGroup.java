@@ -20,7 +20,7 @@ import java.util.List;
  * CoGroupFunction合流，允许降窗口周期内的数据在窗口结束时统一处理
  * 实现窗口周期内左流中的数据与右流中的合并
  * 应用场景：物联网，设备每隔1分钟内会上报一次统计数据和明细数据，分开在两个kafka主题
- * 此时希望将统计数据和明细数据合并成一个字符串串保存
+ * 此时希望将统计数据和明细数据合并成一个字符串串保存（在一个窗口周期内统计数据只有一条，明细数据有多条）
  * 举例：
  * 左流1条数据：1,sensor1,30,1640000000000
  * 右流2条数据：1,sensor1,10,1640000000000和1,sensor1,20,1640000000000
@@ -65,7 +65,7 @@ public class Test12_UseCaseCoGroup {
                     first.forEach(firstList::add);
                     second.forEach(secondList::add);
 
-                    if (firstList.size() > 0 && secondList.size() > 0) {
+                    if (firstList.size() > 0) {
                         SensorDataDetail detail = new SensorDataDetail();
                         SensorData sensorData = firstList.get(0);
                         detail.setSensorData(sensorData);
