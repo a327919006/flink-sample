@@ -143,6 +143,8 @@ public class Test4_UseCaseTopN {
                                 out.collect(list.get(i));
                             }
                         }
+
+                        listState.clear();
                     }
                 })
                 .print("top2");
