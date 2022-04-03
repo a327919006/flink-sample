@@ -2,26 +2,22 @@ package com.cn.flink.transform;
 
 import com.cn.flink.domain.SensorData;
 import com.cn.flink.domain.SensorDataDetail;
-import com.cn.flink.domain.SensorDataResult;
 import com.cn.flink.domain.SensorSubData;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.JoinFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
 
-import java.time.Duration;
 import java.util.Collections;
 
 /**
- * IntervalJoin间隔连接，同样可以实现innerJoin效果
+ * IntervalJoin间隔连接，同样可以实现innerJoin效果，也是1对1join
+ * 不同的是，IntervalJoin没有windows的概念，由一个流中的事件时间，取某个时间范围内的另一个流的数据进行join
  * 有两个流，a流的数据到达后，b流的数据在a流的时间前x秒到后x秒内到达都能与a连接
  * 示例数据：
  * 左流
