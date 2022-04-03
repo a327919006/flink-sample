@@ -3,6 +3,7 @@ package com.cn.flink.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 /**
  * @author Chen Nan
@@ -22,7 +23,7 @@ public class SensorSubData {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", value=" + value +
-                ", timestamp=" + timestamp +
+                ", timestamp=" + DateFormatUtils.format(timestamp, DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()) +
                 '}';
     }
 }
