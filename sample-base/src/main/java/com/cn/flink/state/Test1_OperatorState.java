@@ -12,7 +12,8 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 /**
- * 算子状态，针对当前算子的状态
+ * 算子状态，针对当前算子的状态，作用范围仅在当前算子的并行子任务内有效
+ * 当前算子设置为多并行度时，每个子任务不共享算子状态，都是在独立的内存空间。
  *
  * @author Chen Nan
  */
