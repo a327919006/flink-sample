@@ -1,6 +1,7 @@
 package com.cn.flink.state;
 
 import com.cn.flink.domain.SensorData;
+import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
@@ -43,14 +44,37 @@ public class Test2_KeyState {
         private ValueState<Integer> valueState;
         private ListState<String> listState;
         private MapState<String, Integer> mapState;
-        private ReducingState<String> reducingState;
+        private ReducingState<SensorData> reducingState;
+        private AggregatingState<SensorData, Integer> aggregatingState;
 
         @Override
         public void open(Configuration parameters) throws Exception {
             valueState = getRuntimeContext().getState(new ValueStateDescriptor<>("value-count", Integer.class));
             listState = getRuntimeContext().getListState(new ListStateDescriptor<>("list-state", String.class));
             mapState = getRuntimeContext().getMapState(new MapStateDescriptor<>("map-state", String.class, Integer.class));
-            reducingState = getRuntimeContext().getReducingState(new ReducingStateDescriptor<>("reducing-state", (ReduceFunction<String>) (value1, value2) -> value1 + value2, String.class));
+            reducingState = getRuntimeContext().getReducingState(new ReducingStateDescriptor<>("reducing-state",
+                    (ReduceFunction<SensorData>) (value1, value2) -> value1.getValue() > value2.getValue() ? value1 : value2, SensorData.class));
+            aggregatingState = getRuntimeContext().getAggregatingState(new AggregatingStateDescriptor<>("agg-state", new AggregateFunction<SensorData, Integer, Integer>() {
+                @Override
+                public Integer createAccumulator() {
+                    return 0;
+                }
+
+                @Override
+                public Integer add(SensorData value, Integer accumulator) {
+                    return accumulator + 1;
+                }
+
+                @Override
+                public Integer getResult(Integer accumulator) {
+                    return accumulator;
+                }
+
+                @Override
+                public Integer merge(Integer a, Integer b) {
+                    return a + b;
+                }
+            }, Integer.class));
         }
 
         @Override
@@ -71,6 +95,12 @@ public class Test2_KeyState {
             }
 
             mapState.put("test" + count, count);
+
+            reducingState.add(value);
+            System.out.println("reduceValue=" + reducingState.get());
+
+            aggregatingState.add(value);
+            System.out.println("aggValue=" + aggregatingState.get());
 
             return count;
         }

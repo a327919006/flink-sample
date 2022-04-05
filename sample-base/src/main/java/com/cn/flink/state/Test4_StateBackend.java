@@ -10,7 +10,7 @@ import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 /**
- * 状态后端
+ * 状态后端：定义状态存储的位置，如内存、RocksDB
  *
  * @author Chen Nan
  */
