@@ -6,6 +6,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.state.*;
+import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.configuration.Configuration;
@@ -49,7 +50,19 @@ public class Test2_KeyState {
 
         @Override
         public void open(Configuration parameters) throws Exception {
-            valueState = getRuntimeContext().getState(new ValueStateDescriptor<>("value-count", Integer.class));
+            ValueStateDescriptor<Integer> stateDescriptor = new ValueStateDescriptor<>("value-count", Integer.class);
+            // 定义状态过期策略，过期时间根据系统时间，非事件时间
+            StateTtlConfig ttlConfig = StateTtlConfig.newBuilder(Time.seconds(5))
+                    // 过期时间更新，自动延长过期时间
+                    // OnCreateAndWrite(默认，当创建或写操作)、OnReadAndWrite（读写操作）、Disabled（不过期）
+                    .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
+                    // 获取状态数据时，如果状态已经过期
+                    // NeverReturnExpired（默认，不会返回过期状态）、ReturnExpiredIfNotCleanedUp（只要状态没被clean，就会返回）
+                    .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
+                    .build();
+            stateDescriptor.enableTimeToLive(ttlConfig);
+
+            valueState = getRuntimeContext().getState(stateDescriptor);
             listState = getRuntimeContext().getListState(new ListStateDescriptor<>("list-state", String.class));
             mapState = getRuntimeContext().getMapState(new MapStateDescriptor<>("map-state", String.class, Integer.class));
             reducingState = getRuntimeContext().getReducingState(new ReducingStateDescriptor<>("reducing-state",
@@ -80,6 +93,7 @@ public class Test2_KeyState {
         @Override
         public Integer map(SensorData value) throws Exception {
             Integer count = valueState.value();
+            System.out.println("count=" + count);
             if (count == null) {
                 count = 0;
             }
