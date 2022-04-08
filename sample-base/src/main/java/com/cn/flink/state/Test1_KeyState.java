@@ -19,7 +19,7 @@ import java.util.Iterator;
  *
  * @author Chen Nan
  */
-public class Test2_KeyState {
+public class Test1_KeyState {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);

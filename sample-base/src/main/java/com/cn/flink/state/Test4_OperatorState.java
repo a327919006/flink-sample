@@ -15,9 +15,10 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
  * 算子状态，针对当前算子的状态，作用范围仅在当前算子的并行子任务内有效
  * 当前算子设置为多并行度时，每个子任务不共享算子状态，都是在独立的内存空间。
  * 与直接定义一个如int count来保存状态不同，算子状态由flink实现保存点等容错机制，保障故障后恢复。
+ *
  * @author Chen Nan
  */
-public class Test1_OperatorState {
+public class Test4_OperatorState {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
@@ -41,7 +42,7 @@ public class Test1_OperatorState {
     public static class MyMapFunction implements MapFunction<SensorData, Integer>, CheckpointedFunction {
 
         private Integer count = 0;
-        private transient ListState<Integer> checkpointedState;
+        private transient ListState<Integer> checkPointedState;
 
 
         @Override
@@ -51,8 +52,8 @@ public class Test1_OperatorState {
 
         @Override
         public void snapshotState(FunctionSnapshotContext context) throws Exception {
-            checkpointedState.clear();
-            checkpointedState.add(count);
+            checkPointedState.clear();
+            checkPointedState.add(count);
         }
 
         @Override
@@ -63,10 +64,10 @@ public class Test1_OperatorState {
                             TypeInformation.of(new TypeHint<Integer>() {
                             }));
 
-            checkpointedState = context.getOperatorStateStore().getListState(descriptor);
+            checkPointedState = context.getOperatorStateStore().getListState(descriptor);
 
             if (context.isRestored()) {
-                count = checkpointedState.get().iterator().next();
+                count = checkPointedState.get().iterator().next();
             }
         }
     }
