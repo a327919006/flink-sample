@@ -1,4 +1,4 @@
-package com.cn.flink.state;
+package com.cn.flink.transform;
 
 import com.cn.flink.domain.SensorData;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -21,7 +21,7 @@ import org.apache.flink.util.Collector;
  *
  * @author Chen Nan
  */
-public class Test6_Broadcast {
+public class Test14_Broadcast {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
