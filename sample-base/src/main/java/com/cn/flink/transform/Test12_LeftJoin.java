@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @author Chen Nan
  */
-public class Test11_LeftJoin {
+public class Test12_LeftJoin {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);

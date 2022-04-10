@@ -16,7 +16,7 @@ import java.io.File;
  *
  * @author Chen Nan
  */
-public class Test9_Partition {
+public class Test10_Partition {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);

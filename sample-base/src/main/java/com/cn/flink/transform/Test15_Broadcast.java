@@ -21,7 +21,7 @@ import org.apache.flink.util.Collector;
  *
  * @author Chen Nan
  */
-public class Test14_Broadcast {
+public class Test15_Broadcast {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);

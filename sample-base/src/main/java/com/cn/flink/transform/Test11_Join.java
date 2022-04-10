@@ -28,7 +28,7 @@ import org.apache.flink.streaming.api.windowing.time.Time;
  *
  * @author Chen Nan
  */
-public class Test10_Join {
+public class Test11_Join {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);

@@ -31,7 +31,7 @@ import java.util.List;
  *
  * @author Chen Nan
  */
-public class Test6_UseCaseConnect {
+public class Test9_UseCaseConnect {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);

@@ -13,7 +13,7 @@ import java.io.File;
  *
  * @author Chen Nan
  */
-public class Test8_RichFunction {
+public class Test6_RichFunction {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(4);

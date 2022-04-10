@@ -16,7 +16,7 @@ import java.io.File;
  *
  * @author Chen Nan
  */
-public class Test6_Connect {
+public class Test8_Connect {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);

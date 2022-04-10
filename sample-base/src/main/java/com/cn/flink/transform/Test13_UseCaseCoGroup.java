@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author Chen Nan
  */
-public class Test12_UseCaseCoGroup {
+public class Test13_UseCaseCoGroup {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);

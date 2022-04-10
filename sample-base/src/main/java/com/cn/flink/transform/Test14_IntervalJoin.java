@@ -31,7 +31,7 @@ import java.util.Collections;
  *
  * @author Chen Nan
  */
-public class Test13_IntervalJoin {
+public class Test14_IntervalJoin {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
