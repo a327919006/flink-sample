@@ -10,7 +10,8 @@ import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 /**
- * 状态后端：定义状态存储的位置，如内存、RocksDB
+ * 负责状态的存储、访问以及维护的组件叫状态后端
+ * 分为两类：HashMapStateBackend（存储在内存）和EmbeddedRocksDBStateBackend（存储在RocksDB）
  *
  * @author Chen Nan
  */
