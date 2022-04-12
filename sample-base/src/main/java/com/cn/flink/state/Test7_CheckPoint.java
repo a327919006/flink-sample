@@ -7,6 +7,8 @@ import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
+import org.apache.flink.runtime.state.storage.FileSystemCheckpointStorage;
+import org.apache.flink.runtime.state.storage.JobManagerCheckpointStorage;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
@@ -24,6 +26,13 @@ public class Test7_CheckPoint {
         env.enableCheckpointing(1000);
         // checkPoint执行间隔，同上enableCheckpointing(1000)
         env.getCheckpointConfig().setCheckpointInterval(1000);
+
+        // 配置checkPoint的存储位置，默认为JobManagerCheckpointStorage，即jobManger的堆内存中
+        env.getCheckpointConfig().setCheckpointStorage(new JobManagerCheckpointStorage());
+        // 存储位置为文件系统，如HDFS
+        // String checkPointDir = "filesystem:///root/ck";
+        // env.getCheckpointConfig().setCheckpointStorage(new FileSystemCheckpointStorage(checkPointDir));
+
         // 模式：精准一次
         env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         // 超时时间，防止checkPoint存储端异常导致超时
@@ -36,6 +45,8 @@ public class Test7_CheckPoint {
         env.getCheckpointConfig().setMinPauseBetweenCheckpoints(0);
         // 容忍cp失败次数，默认-1无限次，假设为0，则不允许cp失败，cp失败则当做任务失败
         env.getCheckpointConfig().setTolerableCheckpointFailureNumber(5);
+        // 开启不对齐检查点（即多个并行子任务不用等barrier都到达才进行checkPoint），防止背压
+        env.getCheckpointConfig().enableUnalignedCheckpoints();
 
 
         // 设置故障重启策略
