@@ -30,7 +30,7 @@ public class Test7_CheckPoint {
         // 配置checkPoint的存储位置，默认为JobManagerCheckpointStorage，即jobManger的堆内存中
         env.getCheckpointConfig().setCheckpointStorage(new JobManagerCheckpointStorage());
         // 存储位置为文件系统，如HDFS
-        // String checkPointDir = "filesystem:///root/ck";
+        // String checkPointDir = "filesystem:///root/flink/ck";
         // env.getCheckpointConfig().setCheckpointStorage(new FileSystemCheckpointStorage(checkPointDir));
 
         // 模式：精准一次
