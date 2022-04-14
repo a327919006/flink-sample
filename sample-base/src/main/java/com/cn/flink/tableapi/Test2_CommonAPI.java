@@ -26,6 +26,7 @@ public class Test2_CommonAPI {
         EnvironmentSettings settings = EnvironmentSettings.newInstance()
                 // flink1.14前有区分planner和blink版planner，1.14后删除了旧版planner，无需指定planner
                 // .useBlinkPlanner()
+                // 设置流式处理inStreamingMode或批处理inBatchMode
                 .inStreamingMode()
                 .build();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);

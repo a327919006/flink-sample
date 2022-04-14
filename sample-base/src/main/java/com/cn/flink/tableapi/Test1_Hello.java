@@ -1,6 +1,7 @@
 package com.cn.flink.tableapi;
 
 import com.cn.flink.domain.SensorData;
+import com.cn.flink.source.MySourceFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -23,18 +24,7 @@ public class Test1_Hello {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
 
-        File file = new File("sample-base\\src\\main\\resources\\data.txt");
-        DataStream<SensorData> dataStream = env.readTextFile(file.getAbsolutePath())
-                .map((MapFunction<String, SensorData>) value -> {
-                    String[] split = value.split(",");
-                    SensorData sensorData = new SensorData();
-                    sensorData.setId(Long.parseLong(split[0]));
-                    sensorData.setName(split[1]);
-                    sensorData.setValue(Double.parseDouble(split[2]));
-                    sensorData.setTimestamp(Long.parseLong(split[3]));
-                    return sensorData;
-                }, TypeInformation.of(SensorData.class));
-
+        DataStream<SensorData> dataStream = env.addSource(new MySourceFunction());
 
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
         Table table = tableEnv.fromDataStream(dataStream);

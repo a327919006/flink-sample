@@ -35,8 +35,8 @@ public class MySourceFunction extends RichParallelSourceFunction<SensorData> {
     public void run(SourceContext<SensorData> ctx) throws Exception {
         SensorData sensorData = new SensorData();
         while (!stop) {
-            long id = RandomUtils.nextLong(1, 10);
-            double value = RandomUtils.nextDouble(1, 100);
+            long id = RandomUtils.nextLong(1, 5);
+            double value = RandomUtils.nextInt(1, 100);
             sensorData.setId(id);
             sensorData.setName("sensor" + id);
             sensorData.setValue(value);
