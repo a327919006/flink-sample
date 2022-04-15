@@ -29,11 +29,14 @@ public class Test1_Hello {
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
         Table table = tableEnv.fromDataStream(dataStream);
         Table resultTable = table
-                .select($("id"), $("name"), $("value"), $("timestamp"))
+                .select($("id"),
+                        $("name"),
+                        $("value"),
+                        $("timestamp"))
                 .where($("id").isEqual(1));
 
         tableEnv.createTemporaryView("sensor", table);
-        String sql = "select id, name, `value` from sensor where id=1";
+        String sql = "select id, name, `value` from sensor where id=2";
         Table resultSqlTable = tableEnv.sqlQuery(sql);
 
 
