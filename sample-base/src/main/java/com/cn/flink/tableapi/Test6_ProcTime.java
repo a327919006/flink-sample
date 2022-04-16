@@ -17,6 +17,7 @@ import static org.apache.flink.table.api.Expressions.$;
 
 /**
  * 获取proctime，处理时间
+ * https://nightlies.apache.org/flink/flink-docs-release-1.14/docs/dev/table/data_stream_api/
  *
  * @author Chen Nan
  */
@@ -39,7 +40,26 @@ public class Test6_ProcTime {
 
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
-        Table table = tableEnv.fromDataStream(dataStream, "id, name, value, timestamp as time, pt.proctime");
+        // 方式一
+        // Table table = tableEnv.fromDataStream(dataStream, "id, name, value, timestamp as time, pt.proctime");
+
+        // 方式二
+        // Table table = tableEnv.fromDataStream(dataStream,
+        //         $("id"),
+        //         $("name"),
+        //         $("value"),
+        //         $("timestamp").as("time"),
+        //         $("proctime").proctime().as("pt"));
+
+        // 方式三
+        Schema schema = Schema.newBuilder()
+                .column("id", DataTypes.BIGINT())
+                .column("name", DataTypes.STRING())
+                .column("value", DataTypes.DOUBLE())
+                .column("timestamp", DataTypes.BIGINT())
+                .columnByExpression("proc_time", "PROCTIME()")
+                .build();
+        Table table = tableEnv.fromDataStream(dataStream, schema);
 
         table.printSchema();
         tableEnv.toDataStream(table, Row.class).print();
