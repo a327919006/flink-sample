@@ -17,7 +17,7 @@ public class Test8_Windows {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
 
-        File intputFile = new File("sample-base\\src\\main\\resources\\data.txt");
+        File intputFile = new File("sample-base\\src\\main\\resources\\data_window.txt");
         String intputFilePath = intputFile.getAbsolutePath();
 
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
@@ -37,24 +37,33 @@ public class Test8_Windows {
 
         Table result = tableEnv.sqlQuery(
                 // 旧版
-                // "SELECT " +
-                //         "id, " +
+                // "SELECT id, " +
                 //         "TUMBLE_END(ts, INTERVAL '5' SECOND) as endT, " +
-                //         "MAX(`value`) AS mv " +
+                //         "SUM(`value`) AS mv " +
                 //         "FROM inputTable " +
                 //         "GROUP BY " +                     // 使用窗口和ID进行分组
                 //         "id, " +
                 //         "TUMBLE(`ts`, INTERVAL '5' SECOND)" // 定义滚动窗口
 
-                // 新版
-                "SELECT " +
-                        "id, " +
-                        "window_end AS endT, " +
-                        "MAX(`value`) AS mv " +
+                // 新版-滚动窗口
+                // "SELECT id, window_end AS endT, SUM(`value`) AS mv " +
+                //         "FROM TABLE( " +
+                //         "  TUMBLE( TABLE inputTable, DESCRIPTOR(`ts`), INTERVAL '5' SECOND)" +
+                //         ") " +
+                //         "GROUP BY id, window_start, window_end "
+
+                // 新版-滑动窗口
+                // "SELECT id, window_end AS endT, SUM(`value`) AS mv " +
+                //         "FROM TABLE( " +
+                //         "  HOP( TABLE inputTable, DESCRIPTOR(`ts`), INTERVAL '5' SECOND, INTERVAL '10' SECOND)" +
+                //         ") " +
+                //         "GROUP BY id, window_start, window_end "
+
+                // 新版-累积窗口
+                "SELECT id, window_end AS endT, SUM(`value`) AS mv " +
                         "FROM TABLE( " +
-                        "TUMBLE( TABLE inputTable, " +
-                        "DESCRIPTOR(`ts`), " +
-                        "INTERVAL '5' SECOND)) " +
+                        "  CUMULATE( TABLE inputTable, DESCRIPTOR(`ts`), INTERVAL '5' SECOND, INTERVAL '10' SECOND)" +
+                        ") " +
                         "GROUP BY id, window_start, window_end "
 
         );
