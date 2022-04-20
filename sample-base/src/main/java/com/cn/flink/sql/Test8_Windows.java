@@ -60,11 +60,21 @@ public class Test8_Windows {
                 //         "GROUP BY id, window_start, window_end "
 
                 // 新版-累积窗口
-                "SELECT id, window_end AS endT, SUM(`value`) AS mv " +
-                        "FROM TABLE( " +
-                        "  CUMULATE( TABLE inputTable, DESCRIPTOR(`ts`), INTERVAL '5' SECOND, INTERVAL '10' SECOND)" +
-                        ") " +
-                        "GROUP BY id, window_start, window_end "
+                // "SELECT id, window_end AS endT, SUM(`value`) AS mv " +
+                //         "FROM TABLE( " +
+                //         "  CUMULATE( TABLE inputTable, DESCRIPTOR(`ts`), INTERVAL '5' SECOND, INTERVAL '10' SECOND)" +
+                //         ") " +
+                //         "GROUP BY id, window_start, window_end "
+
+                // 开窗：对每一行数据都会计算一次结果
+                // ,按id分组，按时间列升序（目前只支持按时间类型列升序）
+                // 统计当前行及其前三行数据的平均时间（共4行），起始时不足4行，有多少算多少。
+                "SELECT id, AVG(`time`) OVER( " +
+                        "   PARTITION BY id " +
+                        "   ORDER BY ts" +
+                        "   ROWS BETWEEN 3 PRECEDING AND CURRENT ROW " +
+                        " ) AS avg_ts " +
+                        " FROM inputTable "
 
         );
 
