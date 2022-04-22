@@ -9,6 +9,7 @@ import java.io.File;
 /**
  * TopN：flink针对topN场景对OVER优化，支持ORDER自定义列，升序或降序
  * https://nightlies.apache.org/flink/flink-docs-release-1.14/zh/docs/dev/table/sql/queries/topn/
+ * https://nightlies.apache.org/flink/flink-docs-release-1.14/zh/docs/dev/table/sql/queries/window-topn/
  *
  * @author Chen Nan
  */
@@ -35,6 +36,7 @@ public class Test10_TopN {
                 ")";
         tableEnv.executeSql(inputTableSql);
 
+        // TopN
         Table result = tableEnv.sqlQuery(
                 "SELECT id, dataCount, row_num " +
                         "FROM (" +
@@ -48,9 +50,33 @@ public class Test10_TopN {
         );
 
         // 此处要使用toChangelogStream，因为排名是不断变化的，要支持更新
-        tableEnv.toChangelogStream(result)
-                .print();
+        // tableEnv.toChangelogStream(result)
+        //         .print();
 
+
+        String subQuery = "SELECT id, COUNT(`value`) AS dataCount, window_start, window_end " +
+                "FROM TABLE( " +
+                "  TUMBLE( TABLE inputTable, DESCRIPTOR(`ts`), INTERVAL '5' SECOND) " +
+                ") " +
+                "GROUP BY id, window_start, window_end ";
+
+        // 窗口TopN
+        Table result2 = tableEnv.sqlQuery(
+                "SELECT id, dataCount, row_num, window_end " +
+                        "FROM (" +
+                        "   SELECT *," +
+                        "      ROW_NUMBER() OVER ( " +
+                        "          PARTITION BY window_start, window_end " +
+                        "          ORDER BY dataCount DESC " +
+                        "      ) AS row_num" +
+                        "   FROM ( " + subQuery + ")" +
+                        ")" +
+                        "WHERE row_num <= 2"
+        );
+
+        // 此处可以使用toDataStream，因为开窗后窗口内数据不会变化，排名固定
+        tableEnv.toDataStream(result2)
+                .print();
         env.execute();
     }
 }
