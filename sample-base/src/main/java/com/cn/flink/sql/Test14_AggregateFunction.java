@@ -8,8 +8,8 @@ import org.apache.flink.table.functions.AggregateFunction;
 import java.io.File;
 
 /**
- * 自定义函数：表函数
- * 一条输入，多条输出
+ * 自定义函数：聚合函数
+ * 一条输入，一条输出
  *
  * @author Chen Nan
  */

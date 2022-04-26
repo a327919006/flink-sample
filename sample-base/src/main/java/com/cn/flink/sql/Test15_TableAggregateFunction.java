@@ -15,6 +15,7 @@ import static org.apache.flink.table.api.Expressions.call;
 
 /**
  * 自定义函数：表聚合函数
+ * 一条输入，多条输出
  * 实现Top2
  *
  * @author Chen Nan
