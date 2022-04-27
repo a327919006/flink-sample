@@ -63,6 +63,13 @@
                 <artifactId>flink-json</artifactId>
                 <version>${flink.version}</version>
             </dependency>
+            <!--flink-cep-->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-cep_${scala.library.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
 
             <!--starRocks-->
             <dependency>

@@ -32,6 +32,8 @@ public class Test1_FileSystem {
                 "  'path' = '" + intputFilePath + "'," +
                 "  'format' = 'csv'" +
                 ")";
+
+        // 如果需要输出到控制台，可以使用connector=print
         String outputTableSql = "CREATE TABLE outputTable (" +
                 "  did BIGINT," +
                 "  deviceName STRING," +

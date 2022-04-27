@@ -38,6 +38,11 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-json</artifactId>
         </dependency>
+        <!--flink-cep-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-cep_${scala.library.version}</artifactId>
+        </dependency>
 
         <!--kafka-->
         <dependency>
