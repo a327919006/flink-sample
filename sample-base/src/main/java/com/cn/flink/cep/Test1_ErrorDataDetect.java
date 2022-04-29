@@ -6,22 +6,29 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.cep.CEP;
-import org.apache.flink.cep.PatternSelectFunction;
 import org.apache.flink.cep.PatternStream;
+import org.apache.flink.cep.functions.PatternProcessFunction;
+import org.apache.flink.cep.functions.TimedOutPartialMatchHandler;
 import org.apache.flink.cep.nfa.aftermatch.AfterMatchSkipStrategy;
 import org.apache.flink.cep.pattern.Pattern;
 import org.apache.flink.cep.pattern.conditions.IterativeCondition;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.util.Collector;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.List;
+import java.util.Map;
 
 /**
  * CRP入门：模式匹配
  * https://nightlies.apache.org/flink/flink-docs-release-1.14/zh/docs/libs/cep/
  * CEP已经考虑到数据乱序问题，只需定义好Watermark即可
+ * <p>
+ * 应用示例：检测数据飙高回落事件
+ * 检测用户连续登陆失败多次
  *
  * @author Chen Nan
  */
@@ -108,7 +115,19 @@ public class Test1_ErrorDataDetect {
         PatternStream<SensorData> patternStream = CEP.pattern(dataStream, pattern);
 
         // 3. 将匹配到的复杂事件选择出来，然后包装成字符串报警信息输出
-        patternStream.select((PatternSelectFunction<SensorData, String>) map -> {
+        patternStream.process(new MyPatternProcessFunction()).print();
+
+        env.execute();
+    }
+
+    public static class MyPatternProcessFunction extends PatternProcessFunction<SensorData, String>
+            implements TimedOutPartialMatchHandler<SensorData> {
+
+        /**
+         * 处理正常匹配事件
+         */
+        @Override
+        public void processMatch(Map<String, List<SensorData>> map, Context context, Collector<String> collector) throws Exception {
             SensorData firstData = map.get("firstData").get(0);
             SensorData secondData = map.get("secondData").get(0);
             SensorData thirdData = map.get("thirdData").get(0);
@@ -118,9 +137,15 @@ public class Test1_ErrorDataDetect {
                     "飙高到" + secondData.getValue() + "飙高次数" + count +
                     "又回落到" + thirdData.getValue();
 
-            return warm;
-        }).print();
+            collector.collect(warm);
+        }
 
-        env.execute();
+        /**
+         * 处理超时匹配事件（配置了within才会超时）
+         */
+        @Override
+        public void processTimedOutMatch(Map<String, List<SensorData>> match, Context ctx) throws Exception {
+
+        }
     }
 }
