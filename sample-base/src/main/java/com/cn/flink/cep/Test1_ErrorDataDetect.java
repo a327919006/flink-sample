@@ -13,9 +13,11 @@ import org.apache.flink.cep.nfa.aftermatch.AfterMatchSkipStrategy;
 import org.apache.flink.cep.pattern.Pattern;
 import org.apache.flink.cep.pattern.conditions.IterativeCondition;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
+import org.apache.flink.util.OutputTag;
 
 import java.io.File;
 import java.time.Duration;
@@ -63,7 +65,7 @@ public class Test1_ErrorDataDetect {
                 // 1.4.3、skipPastLastEvent（a1 a2 a3 b） 最精简
                 // 1.4.4、skipToFirst只保留以a1开始的事件（a1 a2 a3 b），（a1 a2 b），（a1 b）
                 // 1.4.5、skipToLast只保留含a3的事件（a1 a2 a3 b），（a3 b）
-                        <SensorData>begin("firstData", AfterMatchSkipStrategy.skipToLast("a"))
+                        <SensorData>begin("firstData")
                 .where(new IterativeCondition<SensorData>() {
                     @Override
                     public boolean filter(SensorData sensorData, Context<SensorData> context) throws Exception {
@@ -109,19 +111,34 @@ public class Test1_ErrorDataDetect {
                     }
                 })
                 // 1.4、时间限制：上述模式必须在指定时间范围内的数据上匹配
-                .within(Time.seconds(100));
+                .within(Time.seconds(10));
 
         // 2. 将Pattern应用到流上，检测匹配的复杂事件，得到一个PatternStream
         PatternStream<SensorData> patternStream = CEP.pattern(dataStream, pattern);
 
+        OutputTag<String> timeoutTag = new OutputTag<String>("timeout") {
+        };
+        OutputTag<String> lateTag = new OutputTag<String>("late") {
+        };
         // 3. 将匹配到的复杂事件选择出来，然后包装成字符串报警信息输出
-        patternStream.process(new MyPatternProcessFunction()).print();
+        SingleOutputStreamOperator<String> result = patternStream
+                .sideOutputLateData()
+                .process(new MyPatternProcessFunction(timeoutTag));
+        DataStream<String> timeoutResult = result.getSideOutput(timeoutTag);
+
+        result.print("result");
+        timeoutResult.print("timeout");
 
         env.execute();
     }
 
     public static class MyPatternProcessFunction extends PatternProcessFunction<SensorData, String>
             implements TimedOutPartialMatchHandler<SensorData> {
+        private OutputTag<String> timeoutTag;
+
+        public MyPatternProcessFunction(OutputTag<String> timeoutTag) {
+            this.timeoutTag = timeoutTag;
+        }
 
         /**
          * 处理正常匹配事件
@@ -141,11 +158,25 @@ public class Test1_ErrorDataDetect {
         }
 
         /**
-         * 处理超时匹配事件（配置了within才会超时）
+         * 处理超时事件：已匹配到部分事件，未全部匹配前已超时（配置了within才会超时）
          */
         @Override
         public void processTimedOutMatch(Map<String, List<SensorData>> match, Context ctx) throws Exception {
+            SensorData firstData = match.get("firstData").get(0);
+            SensorData secondData = null;
+            int count = 0;
+            if (match.containsKey("secondData")) {
+                secondData = match.get("secondData").get(0);
+                count = match.get("secondData").size();
+            }
 
+            if (count > 0) {
+                String warm = "id=" + firstData.getId() + "数值从" + firstData.getValue() +
+                        "飙高到" + secondData.getValue() + "飙高次数" + count +
+                        "超时未回落";
+
+                ctx.output(timeoutTag, warm);
+            }
         }
     }
 }
