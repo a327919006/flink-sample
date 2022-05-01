@@ -118,12 +118,10 @@ public class Test1_ErrorDataDetect {
 
         OutputTag<String> timeoutTag = new OutputTag<String>("timeout") {
         };
-        OutputTag<String> lateTag = new OutputTag<String>("late") {
-        };
         // 3. 将匹配到的复杂事件选择出来，然后包装成字符串报警信息输出
         SingleOutputStreamOperator<String> result = patternStream
-                .sideOutputLateData()
                 .process(new MyPatternProcessFunction(timeoutTag));
+        // 获取超时侧输出流
         DataStream<String> timeoutResult = result.getSideOutput(timeoutTag);
 
         result.print("result");
