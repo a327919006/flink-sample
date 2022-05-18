@@ -16,14 +16,20 @@ import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 
 /**
  * 从kafka读入数据，写入StarRocks
- * 测试数据：{"score":"66","name":"zhangsan"}
- * 建表语句：
- * CREATE TABLE IF NOT EXISTS student_score (
- *     score INT NOT NULL COMMENT "score",
- *     name VARCHAR(100) NOT NULL COMMENT "name")
- * AGGREGATE KEY(score, name)
- * DISTRIBUTED BY HASH(score) BUCKETS 10
- * PROPERTIES("replication_num" = "1");
+ * 1、往kafka写入测试数据：
+ *      {"score":"66","name":"zhangsan"}
+ * 2、StarRocks建库
+ *      CREATE DATABASE example_db;
+ * 3、StarRocks建表
+ *      CREATE TABLE IF NOT EXISTS example_db.student_score (
+ *          score INT NOT NULL COMMENT "score",
+ *          name VARCHAR(100) NOT NULL COMMENT "name")
+ *      AGGREGATE KEY(score, name)
+ *      DISTRIBUTED BY HASH(score) BUCKETS 10
+ *      PROPERTIES("replication_num" = "1");
+ * 4、查询结果
+ *      select * from example_db.student_score
+ *
  * @author Chen Nan
  */
 @Slf4j
@@ -43,8 +49,8 @@ public class StarRocksTest {
         SinkFunction<String> sink = StarRocksSink.sink(
                 // the sink options
                 StarRocksSinkOptions.builder()
-                        .withProperty("jdbc-url", "jdbc:mysql://192.168.5.134:9030")
-                        .withProperty("load-url", "192.168.5.134:8030")
+                        .withProperty("jdbc-url", "jdbc:mysql://192.168.5.131:19030")
+                        .withProperty("load-url", "192.168.5.131:18030")
                         .withProperty("username", "test")
                         .withProperty("password", "123456")
                         .withProperty("database-name", "example_db")
@@ -60,13 +66,13 @@ public class StarRocksTest {
         StreamExecutionEnvironment env = StreamContextEnvironment.getExecutionEnvironment();
 
         env.fromSource(source, WatermarkStrategy.noWatermarks(), "property-kafka-source")
-//                .process(new ProcessFunction<String, String>() {
-//                    @Override
-//                    public void processElement(String value, Context ctx, Collector<String> out) throws Exception {
-//                        System.out.println("value=" + value);
-//                        out.collect(value);
-//                    }
-//                })
+                .process(new ProcessFunction<String, String>() {
+                    @Override
+                    public void processElement(String value, Context ctx, Collector<String> out) throws Exception {
+                        System.out.println("value=" + value);
+                        out.collect(value);
+                    }
+                })
                 .addSink(sink)
                 .name("test_starrocks");
 
