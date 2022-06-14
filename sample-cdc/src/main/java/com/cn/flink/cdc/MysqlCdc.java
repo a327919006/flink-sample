@@ -1,13 +1,18 @@
 package com.cn.flink.cdc;
 
+import com.cn.flink.cdc.util.EnvironmentUtils;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.ververica.cdc.debezium.StringDebeziumDeserializationSchema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.client.program.StreamContextEnvironment;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
+import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.hadoop.hdfs.client.HdfsUtils;
 
 /**
  * 入门示例
@@ -37,22 +42,17 @@ public class MysqlCdc {
                 // latest：从binlog的最新位置开始读取
                 // specificOffset：从binlog指定位置开始读取
                 // timestamp：从指定时间之后的binlog开始读取
-                .startupOptions(StartupOptions.initial())
+//                .startupOptions(StartupOptions.initial())
                 .deserializer(new StringDebeziumDeserializationSchema())
                 .build();
 
         StreamExecutionEnvironment env = StreamContextEnvironment.getExecutionEnvironment();
+        // 配置checkpoint，实现重启任务，继续上次binlog位置读取
+//        StreamExecutionEnvironment env = EnvironmentUtils.getEnv(MysqlCdc.class);
         env.setParallelism(1);
 
-        // 配置checkpoint，实现重启任务，继续上次binlog位置读取
-        env.enableCheckpointing(5000); // 每5秒生成一次检查点
-        env.getCheckpointConfig().setCheckpointTimeout(60000);
-        env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
-        env.setStateBackend(new FsStateBackend("file:///data/flink/checkpoints"));
-
         env.fromSource(source, WatermarkStrategy.noWatermarks(), "mysql-cdc-source")
-                .print()
+                .print("print-data")
                 .name("test_cdc");
 
         env.execute();
