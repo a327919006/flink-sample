@@ -26,6 +26,8 @@ public class SinkTest1_File {
         FileSink<String> sink = FileSink
                 // 自定输出文件路径及编码
                 .forRowFormat(new Path("./output"), new SimpleStringEncoder<String>("UTF-8"))
+//                .forRowFormat(new Path("hdfs://192.168.5.141:56534/test/flink/output"), new SimpleStringEncoder<String>("UTF-8"))
+//                .forRowFormat(new Path("alluxio://192.168.5.144:19998/mnt/hdfs/flink/output"), new SimpleStringEncoder<String>("UTF-8"))
                 // 指定文件滚动策略，类似日志每隔一段时间生成新文件、或文件达到指定大小生成新文件
                 .withRollingPolicy(
                         DefaultRollingPolicy.builder()
