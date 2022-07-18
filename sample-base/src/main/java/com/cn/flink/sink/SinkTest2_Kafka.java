@@ -17,9 +17,12 @@ public class SinkTest2_Kafka {
 
     public static void main(String[] args) throws Exception {
         KafkaSink<String> sink = KafkaSink.<String>builder()
-                .setBootstrapServers("127.0.0.1:9092")
+                .setBootstrapServers("192.168.5.131:39573")
                 .setRecordSerializer(KafkaRecordSerializationSchema.builder()
-                        .setTopic("sink_test")
+                        // 固定topic
+                        //.setTopic("sink_test")
+                        // 动态topic，根据数据动态指定topic
+                        .setTopicSelector(new CustomKafkaTopicSelector())
                         .setValueSerializationSchema(new SimpleStringSchema())
                         .build()
                 )
