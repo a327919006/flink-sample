@@ -12,6 +12,7 @@
         <module>sample-base</module>
         <module>sample-starrocks</module>
         <module>sample-cdc</module>
+        <module>sample-wc</module>
     </modules>
 
 
