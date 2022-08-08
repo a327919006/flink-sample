@@ -20,6 +20,30 @@ import java.util.Properties;
  * 从kafka读入数据，写入Doris
  * 数据格式为json
  *
+ * #简单样例
+ * 1、建立库表
+ * CREATE DATABASE example_db;
+ * USE example_db;
+ * CREATE TABLE table1
+ * (
+ *     siteid INT DEFAULT '10',
+ *     citycode SMALLINT,
+ *     username VARCHAR(32) DEFAULT '',
+ *     pv BIGINT SUM DEFAULT '0'
+ * )
+ * AGGREGATE KEY(siteid, citycode, username)
+ * DISTRIBUTED BY HASH(siteid) BUCKETS 10
+ * PROPERTIES("replication_num" = "1");
+ *
+ * insert into table1 values(1,1,"test",2);
+ * select * from table1;
+ *
+ * 2、往kafka写入数据
+ * {"siteid":2,"citycode":2,"username":"test2","pv":2}
+ *
+ * 3、查看结果
+ * select * from table1;
+ *
  * @author Chen Nan
  */
 public class DorisTest {
