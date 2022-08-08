@@ -13,6 +13,7 @@
         <module>sample-starrocks</module>
         <module>sample-cdc</module>
         <module>sample-wc</module>
+        <module>sample-doris</module>
     </modules>
 
 
