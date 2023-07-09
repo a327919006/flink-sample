@@ -11,7 +11,7 @@ import com.alibaba.alink.pipeline.dataproc.vector.VectorAssembler;
  */
 public class KMeansExample {
     public static void main(String[] args) throws Exception {
-        String URL = "E:\\data\\alink\\iris/iris.data";
+        String URL = "E:/data/alink/iris/iris.data";
         String SCHEMA_STR = "sepal_length double, sepal_width double, petal_length double, petal_width double, category string";
         BatchOperator data = new CsvSourceBatchOp().setFilePath(URL).setSchemaStr(SCHEMA_STR);
         VectorAssembler va = new VectorAssembler()
